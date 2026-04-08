@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>FPS BOOSTER PRO | RAIO DE DESEMPENHO</title>
+
+<style>
+    /* Reset e base */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        user-select: none; /* Evita seleção durante clique rápido, melhora sensação de "boost" */
+    }
+
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', 'Poppins', 'Arial', sans-serif;
+        background: #0a0f1e; /* fallback caso a imagem demore */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        transition: all 0.2s ease;
+    }
+
+    /* === FUNDO DO RAIO - IMAGEM ESTILIZADA === */
+    /* Usamos uma imagem de alta qualidade de um raio dramático com céu escuro.
+       A URL é confiável (Unsplash / via Cloudimage) - foto realista de raio.
+       Caso queira máxima performance offline, é um link público. */
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('https://images.pexels.com/photos/534220/lightning-storm-storm-sky-534220.jpeg?auto=compress&cs=tinysrgb&w=1600');
+        background-size: cover;
+        background-position: center 30%;
+        background-repeat: no-repeat;
+        filter: brightness(0.85) contrast(1.1);
+        z-index: -2;
+    }
+
+    /* Overlay escuro semitransparente para garantir legibilidade do texto e dar contraste dramático */
+    body::after {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.55);
+        backdrop-filter: blur(1px);
+        z-index: -1;
+    }
+
+    /* Container principal com vidro (glassmorphism) para combinar com o tema raio + fps */
+    .container {
+        background: rgba(10, 20, 30, 0.65);
+        backdrop-filter: blur(12px);
+        border-radius: 48px;
+        padding: 28px 22px 38px 22px;
+        margin: 20px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 25px 45px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        transition: transform 0.2s, box-shadow 0.3s;
+        text-align: center;
+    }
+
+    h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #FFF8E7, #FFD966);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        letter-spacing: -0.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    h1::before {
+        content: "⚡";
+        font-size: 2rem;
+        background: none;
+        -webkit-background-clip: unset;
+        color: #FFD966;
+        text-shadow: 0 0 5px #ffaa33;
+    }
+
+    h1::after {
+        content: "⚡";
+        font-size: 2rem;
+        background: none;
+        -webkit-background-clip: unset;
+        color: #FFD966;
+        text-shadow: 0 0 5px #ffaa33;
+    }
+
+    .sub {
+        color: #e0e0e0;
+        font-weight: 500;
+        margin-top: 8px;
+        margin-bottom: 20px;
+        font-size: 1rem;
+        background: rgba(0,0,0,0.4);
+        display: inline-block;
+        padding: 4px 16px;
+        border-radius: 40px;
+        backdrop-filter: blur(4px);
+    }
+
+    /* Barra de progresso com brilho */
+    .bar {
+        width: 100%;
+        height: 24px;
+        background: rgba(0, 0, 0, 0.55);
+        border-radius: 40px;
+        margin: 28px 0 20px 0;
+        overflow: hidden;
+        box-shadow: inset 0 1px 4px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,215,0,0.3);
+    }
+
+    .progress {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #FFB347, #FFD966, #FFC107);
+        border-radius: 40px;
+        box-shadow: 0 0 10px #ffcc44;
+        transition: width 0.05s linear;
+    }
+
+    /* Status com fundo escuro e brilho */
+    .status {
+        margin: 20px 0 15px;
+        font-size: 1.35rem;
+        font-weight: bold;
+        background: rgba(0, 0, 0, 0.65);
+        display: inline-block;
+        padding: 12px 24px;
+        border-radius: 60px;
+        backdrop-filter: blur(5px);
+        color: #FFE484;
+        letter-spacing: 0.5px;
+        border-left: 3px solid #FFD966;
+        border-right: 3px solid #FFD966;
+        transition: all 0.2s;
+    }
+
+    /* Botão com efeito elétrico */
+    button {
+        margin-top: 18px;
+        padding: 16px 32px;
+        font-size: 1.35rem;
+        font-weight: bold;
+        border: none;
+        border-radius: 60px;
+        background: radial-gradient(circle at 30% 10%, #FFC857, #FFA500);
+        color: #1f2a1b;
+        cursor: pointer;
+        box-shadow: 0 8px 18px rgba(0,0,0,0.3), 0 0 12px rgba(255, 200, 0, 0.6);
+        transition: 0.1s linear;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        letter-spacing: 1px;
+    }
+
+    button:active {
+        transform: scale(0.96);
+        box-shadow: 0 2px 8px black;
+        background: radial-gradient(circle at 30% 10%, #FFB82E, #FF9100);
+    }
+
+    /* Efeito de faísca extra no botão durante boost (simulação visual) */
+    .spark-effect {
+        animation: tinySpark 0.2s ease-out;
+    }
+
+    @keyframes tinySpark {
+        0% { text-shadow: 0 0 0px gold; }
+        50% { text-shadow: 0 0 12px #ffcc33, 0 0 5px orange; transform: scale(1.02);}
+        100% { text-shadow: 0 0 0px; }
+    }
+
+    /* Pequeno selo de energia */
+    .energy-badge {
+        margin-top: 25px;
+        font-size: 0.75rem;
+        color: #ccc;
+        background: rgba(0,0,0,0.5);
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 30px;
+        backdrop-filter: blur(4px);
+    }
+
+    /* Animação de relâmpago ao final do boost (simulação de pico de fps) */
+    @keyframes lightningFlash {
+        0% { filter: brightness(1);}
+        10% { filter: brightness(1.6) contrast(1.3); background-color: rgba(255,230,140,0.2);}
+        30% { filter: brightness(1);}
+        100% { filter: brightness(1);}
+    }
+
+    .flash-on-boost {
+        animation: lightningFlash 0.4s ease-in-out;
+    }
+
+    /* Responsivo */
+    @media (max-width: 550px) {
+        .container { padding: 20px 16px 30px; }
+        h1 { font-size: 1.7rem; }
+        .status { font-size: 1.1rem; padding: 8px 18px; }
+        button { padding: 12px 24px; font-size: 1.2rem; }
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>FPS BOOSTER PRO</h1>
+    <div class="sub">⚡ ATIVE A FORÇA DO RAIO ⚡</div>
+    <p style="color:#ddd; margin-bottom: 5px; font-weight: 500;">Otimização turbo + Ray Tracing simbólico</p>
+
+    <div class="bar">
+        <div class="progress" id="progress"></div>
+    </div>
+
+    <div class="status" id="status">
+        🌩️ PRONTO PARA O BOOST
+    </div>
+
+    <button id="boostBtn" onclick="boostFPS()">
+        ⚡ AUMENTAR FPS 🚀
+    </button>
+    <div class="energy-badge">
+        🔋 Modo Raio | Desempenho máximo
+    </div>
+</div>
+
+<script>
+    // Elementos do DOM
+    const progressBar = document.getElementById("progress");
+    const statusDiv = document.getElementById("status");
+    const boostButton = document.getElementById("boostBtn");
+
+    // Variável de controle para evitar múltiplos boosts simultâneos
+    let boostingActive = false;
+    let currentInterval = null;
+
+    // Função principal de otimização com progresso realista (simulação de limpeza)
+    function boostFPS() {
+        // Previne spam de cliques durante animação de boost
+        if (boostingActive) {
+            // Se já estiver otimizando, podemos dar um pequeno feedback visual (sem quebrar)
+            if (statusDiv.innerText.includes("OTIMIZADO")) {
+                statusDiv.innerText = "⚡ Já está no máximo! ⚡";
+                setTimeout(() => {
+                    if (!boostingActive) statusDiv.innerText = "✅ FPS OTIMIZADO!";
+                }, 800);
+            } else {
+                // Mostra que o processo já está em andamento
+                statusDiv.innerText = "🌀 Já em otimização... Aguarde!";
+                setTimeout(() => {
+                    if (boostingActive) return;
+                    if (statusDiv.innerText === "🌀 Já em otimização... Aguarde!") 
+                        statusDiv.innerText = "Pronto para otimizar";
+                }, 1000);
+            }
+            return;
+        }
+
+        // Limpa qualquer intervalo pendente (segurança)
+        if (currentInterval) {
+            clearInterval(currentInterval);
+            currentInterval = null;
+        }
+
+        // Reset do progresso
+        progressBar.style.width = "0%";
+        boostingActive = true;
+
+        // Pequeno delay para garantir o reset visual
+        let percent = 0;
+
+        // Feedback tátil instantâneo (simula início do boost)
+        if (navigator.vibrate) {
+            navigator.vibrate(50);
+        }
+
+        // Efeito visual de clique com raio (adiciona brilho rápido no botão)
+        boostButton.classList.add("spark-effect");
+        setTimeout(() => {
+            boostButton.classList.remove("spark-effect");
+        }, 200);
+
+        // Adiciona um efeito de flash no body (simulando a descarga elétrica do raio)
+        document.body.classList.add("flash-on-boost");
+        setTimeout(() => {
+            document.body.classList.remove("flash-on-boost");
+        }, 450);
+
+        // Atualiza status inicial
+        statusDiv.innerText = "⚡ Iniciando otimização turbo...";
+
+        // Inicia o intervalo de progresso (a cada 35ms fica mais fluido, simulando alta taxa)
+        currentInterval = setInterval(() => {
+            percent++;
+
+            // Atualiza a largura da barra
+            progressBar.style.width = percent + "%";
+
+            // Mensagens dinâmicas com tema "raio" e FPS extremo
+            if (percent === 5) {
+                statusDiv.innerText = "🌩️ Canalizando energia do relâmpago...";
+            }
+            if (percent === 18) {
+                statusDiv.innerText = "💾 Limpando memória RAM em alta voltagem...";
+            }
+            if (percent === 30) {
+                statusDiv.innerText = "⚡ Fechando processos fantasmas e apps ociosos";
+            }
+            if (percent === 45) {
+                statusDiv.innerText = "🎮 Sincronizando GPU com descarga elétrica...";
+            }
+            if (percent === 60) {
+                statusDiv.innerText = "🔋 Otimizando estabilidade de quadros (V-Sync off)";
+            }
+            if (percent === 75) {
+                statusDiv.innerText = "🌀 Aplicando overclock seguro estilo Raio-Turbo";
+            }
+            if (percent === 90) {
+                statusDiv.innerText = "✨ Quase lá! Injetando Ray Tracing Fictício...";
+            }
+
+            // Quando atinge 100% finaliza
+            if (percent >= 100) {
+                clearInterval(currentInterval);
+                currentInterval = null;
+                progressBar.style.width = "100%";
+                
+                // Status final de sucesso
+                statusDiv.innerText = "✅ FPS OTIMIZADO! 🔥 Modo Raio Ativo!";
+                
+                // Ativa o modo performance que também inclui efeito de vibração dupla e brilho extra
+                ativarModoPerformance();
+                
+                // Reseta a flag depois de completar o boost
+                boostingActive = false;
+
+                // Efeito extra: após 2 segundos, mantém a mensagem de sucesso mas se quiser podemos restaurar para "pronto"
+                // mas fica mostrando sucesso. Só volta ao "pronto" se usuário clicar novamente? Não, mantém sucesso
+                // Após 3 segundos, suavemente altera o texto para algo convidativo sem perder o estado otimizado
+                setTimeout(() => {
+                    if (statusDiv.innerText === "✅ FPS OTIMIZADO! 🔥 Modo Raio Ativo!") {
+                        // Mantém otimizado mas adiciona dica, não atrapalha
+                        statusDiv.innerHTML = "✅ FPS MAXIMIZADO ⚡ Raio ativo!";
+                    }
+                }, 2800);
+            }
+        }, 32); // velocidade mais rápida para dar sensação de processamento ágil (32ms)
+    }
+
+    // Função que simula o "Modo Performance" definitivo com ativação de efeitos visuais no DOM
+    function ativarModoPerformance() {
+        // 1) Reduz transições e animações pesadas da página para simular maior FPS
+        document.body.style.transition = "none";
+        const containerElem = document.querySelector(".container");
+        if (containerElem) {
+            containerElem.style.transition = "none";
+        }
+        
+        // 2) Adiciona um brilho extra (classe opcional) que simula modo turbo
+        const containerDiv = document.querySelector(".container");
+        if (containerDiv) {
+            containerDiv.style.boxShadow = "0 0 0 2px rgba(255, 215, 0, 0.7), 0 20px 40px rgba(0,0,0,0.5)";
+            containerDiv.style.border = "1px solid #FFD966";
+        }
+        
+        // 3) Vibração dupla para dar feedback tátil imersivo (se suportado)
+        if (navigator.vibrate) {
+            navigator.vibrate([120, 70, 120]);
+        }
+        
+        // 4) Criar um efeito de raio artificial no background: um clarão rápido no container
+        const flashElement = document.createElement("div");
+        flashElement.style.position = "fixed";
+        flashElement.style.top = "0";
+        flashElement.style.left = "0";
+        flashElement.style.width = "100%";
+        flashElement.style.height = "100%";
+        flashElement.style.pointerEvents = "none";
+        flashElement.style.background = "radial-gradient(circle at 50% 30%, rgba(255,220,100,0.3), transparent)";
+        flashElement.style.zIndex = "9999";
+        flashElement.style.opacity = "0";
+        flashElement.style.transition = "opacity 0.1s";
+        document.body.appendChild(flashElement);
+        
+        // Ativa o flash estilo trovão
+        setTimeout(() => {
+            flashElement.style.opacity = "0.8";
+            setTimeout(() => {
+                flashElement.style.opacity = "0";
+                setTimeout(() => {
+                    if (flashElement && flashElement.remove) flashElement.remove();
+                }, 250);
+            }, 100);
+        }, 10);
+        
+        // 5) Adiciona um mini efeito nas bordas dos elementos: brilho pulsante por 1.5s
+        const styleTag = document.createElement("style");
+        styleTag.id = "tempBoostGlow";
+        styleTag.innerText = `
+            .container {
+                animation: borderPulse 0.8s ease-out 2;
+            }
+            @keyframes borderPulse {
+                0% { box-shadow: 0 0 0 1px rgba(255,215,0,0.4), 0 25px 45px rgba(0,0,0,0.4); }
+                50% { box-shadow: 0 0 0 4px #FFD966, 0 0 25px #ffcc44, 0 25px 45px black; }
+                100% { box-shadow: 0 0 0 1px rgba(255,215,0,0.3), 0 25px 45px rgba(0,0,0,0.4); }
+            }
+        `;
+        document.head.appendChild(styleTag);
+        
+        // Remove o estilo após 2 segundos para não conflitar
+        setTimeout(() => {
+            const tempStyle = document.getElementById("tempBoostGlow");
+            if (tempStyle) tempStyle.remove();
+            // Restaura transição suave do container sem prejudicar a UX
+            if (containerDiv) containerDiv.style.transition = "";
+            document.body.style.transition = "";
+        }, 1800);
+        
+        // 6) Simula também um aumento de FPS na página: desativa algumas animações pesadas se houver hover
+        // Isso é simbólico, mas para a experiência, adicionamos um data attribute
+        document.body.setAttribute("data-fps-boost", "active");
+        
+        // 7) Para demonstrar poder, podemos também acelerar qualquer requestAnimationFrame? Simbolicamente,
+        // nós aumentamos a performance visual por CSS: nenhuma animação contínua pesada original.
+        // Finalmente, log no console para os nerds
+        console.log("%c⚡ MODO FPS BOOST ATIVADO! O RAIO CONCEDEU PODER! ⚡", "color: #ffcc33; font-size: 14px; font-weight: bold; background: #000; padding: 4px 8px; border-radius: 20px;");
+        
+        // Adiciona um "selo de raio" temporário no canto direito inferior (opcional)
+        const raioStamp = document.createElement("div");
+        raioStamp.innerText = "⚡ RAIO PERFORMANCE ⚡";
+        raioStamp.style.position = "fixed";
+        raioStamp.style.bottom = "12px";
+        raioStamp.style.right = "12px";
+        raioStamp.style.backgroundColor = "rgba(0,0,0,0.7)";
+        raioStamp.style.color = "#FFD966";
+        raioStamp.style.fontSize = "10px";
+        raioStamp.style.padding = "6px 12px";
+        raioStamp.style.borderRadius = "30px";
+        raioStamp.style.fontWeight = "bold";
+        raioStamp.style.backdropFilter = "blur(8px)";
+        raioStamp.style.zIndex = "999";
+        raioStamp.style.fontFamily = "monospace";
+        raioStamp.style.borderLeft = "2px solid gold";
+        raioStamp.style.pointerEvents = "none";
+        raioStamp.style.opacity = "0";
+        raioStamp.style.transition = "opacity 0.3s";
+        document.body.appendChild(raioStamp);
+        
+        setTimeout(() => {
+            raioStamp.style.opacity = "1";
+            setTimeout(() => {
+                raioStamp.style.opacity = "0";
+                setTimeout(() => {
+                    if (raioStamp && raioStamp.remove) raioStamp.remove();
+                }, 1200);
+            }, 2500);
+        }, 50);
+    }
+    
+    // Adicionar um efeito de duplo clique para demonstrar resiliência: previnir overflow, mas tudo certo.
+    // Também garantimos que ao carregar a página o fundo raio está magnifico e nenhum erro de carregamento
+    window.addEventListener("load", () => {
+        // Pequena checagem de imagem de fundo carregada (estilo já setado)
+        console.log("FPS BOOSTER PRO - TEMA RAIO CARREGADO | Pronto para turbinar!");
+        // Opcional: pré-carregar a imagem mentalmente, mas a URL é confiável.
+        // Adicionar um mini efeito de boas vindas
+        setTimeout(() => {
+            if (statusDiv.innerText.includes("PRONTO")) {
+                statusDiv.style.transition = "0.2s";
+                statusDiv.style.textShadow = "0 0 4px gold";
+                setTimeout(() => {
+                    if (statusDiv) statusDiv.style.textShadow = "";
+                }, 800);
+            }
+        }, 300);
+    });
+</script>
+</body>
+</html>
